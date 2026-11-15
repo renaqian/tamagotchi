@@ -35,7 +35,7 @@
 `define ENERGY_LOW 3
 
 // temporary macros
-`define RUN 1
+`define RUN 1'b1
 
 /*
 	
