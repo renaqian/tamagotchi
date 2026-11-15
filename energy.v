@@ -27,13 +27,15 @@
 	
 */ 
 
-'define DECAY_TICKS 3
-'define REGEN_TICKS 2
-'define ENERGY_DECAY 1
-'define ENERGY_REGEN 1
+`define DECAY_TICKS 3
+`define REGEN_TICKS 2
+`define ENERGY_DECAY 1
+`define ENERGY_REGEN 1
+`define ENERGY_MAX 9
+`define ENERGY_LOW 3
 
 // temporary macros
-'define RUN 1
+`define RUN 1
 
 /*
 	
@@ -43,7 +45,12 @@
 
 */
 
-module energy (SW);
+module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
+					 parameter REGEN_TICKS = `REGEN_TICKS, 
+					 parameter DECAY_AMT = `ENERGY_DECAY,
+					 parameter REGEN_AMT = `ENERGY_REGEN,
+					 parameter MAX_VAL = `ENERGY_MAX,
+					 parameter LOW_THRESH = `ENERGY_LOW)
 (
 	input clk,
 	input resetn,
@@ -55,6 +62,11 @@ module energy (SW);
 	output energy_low,
 	output energy_zero
 );
+		
+	localparam [3:0] MAX4 = MAX_VAL;
+	localparam [3:0] DEC4 = DECAY_AMT;
+	localparam [3:0] REG4 = REGEN_AMT;
+	localparam [3:0] LOW4 = LOW_THRESH;
 	
 	reg [7:0] cnt;
 	reg sleeping_d;
@@ -63,9 +75,13 @@ module energy (SW);
 	assign energy_low = (energy < 4'd4);
 	assign energy_zero = (energy == 4'd0);
 	
+	wire [4:0] up_sum = {1'b0, energy} + {1'b0, REG4};
+	wire [3:0] energy_up = {up_sum > {1'b0, MAX4}) ? MAX4 : up_sum[3:0];
+	wire [3:0] energy_down = (energy > DEC4) ? (energy - DEC4) : 4'd0;
+	
 	always @(posedge clk or negedge resetn) begin
 		if (!resetn) begin
-			energy <= 4'd10;
+			energy <= MAX4;
 			cnt <= 8'd0;
 			sleeping_d <= 1'b0;
 		end 
@@ -76,11 +92,21 @@ module energy (SW);
 				cnt <= 8'd0;
 			end
 			else if (ticks & run) begin
-					if (cnt == REGEN_TICKS)
-						energy <= energy + 1'd1;
-						// im lost
-				
-	
-endmodule 
+				if (sleeping) begin
+					if (cnt >= REGEN_TICKS - 1) begin
+						cnt <= 8'd0;
+						energy <= energy_up;
+					end else
+						cnt <= cnt + 1'b1;
+				end else begin
+						if (cnt >= DECAY_TICKS - 1) begin
+							cnt <= 8'd0;
+							energy <= energy_down;
+						end else
+							cnt <= cnt + 1'b1;
+				end 
+			end
+		end
+	end
 
-endmodule
+endmodule 
