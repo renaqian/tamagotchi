@@ -34,9 +34,6 @@
 `define ENERGY_MAX 9
 `define ENERGY_LOW 3
 
-// temporary macros
-`define RUN 1'b1
-
 /*
 	
 	awake: loses ENERGY_DECAY points every DECAY_TICKS ticks (!SW[0])
@@ -56,7 +53,7 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 	input resetn,
 	input tick,
 	input RUN,
-	input SW[0],
+	input SW,
 	output reg [3:0] energy,
 	output sleeping,
 	output energy_low,
@@ -71,12 +68,12 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 	reg [7:0] cnt;
 	reg sleeping_d;
 	
-	assign sleeping = SW[0] & run;
+	assign sleeping = SW & RUN;
 	assign energy_low = (energy < 4'd4);
 	assign energy_zero = (energy == 4'd0);
 	
 	wire [4:0] up_sum = {1'b0, energy} + {1'b0, REG4};
-	wire [3:0] energy_up = {up_sum > {1'b0, MAX4}) ? MAX4 : up_sum[3:0];
+	wire [3:0] energy_up = (up_sum > {1'b0, MAX4}) ? MAX4 : up_sum[3:0];
 	wire [3:0] energy_down = (energy > DEC4) ? (energy - DEC4) : 4'd0;
 	
 	always @(posedge clk or negedge resetn) begin
@@ -86,12 +83,12 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 			sleeping_d <= 1'b0;
 		end 
 		else begin
-			sleeping <= sleeping_d;
+			sleeping_d <= sleeping;
 			
 			if (sleeping != sleeping_d) begin
 				cnt <= 8'd0;
 			end
-			else if (ticks & run) begin
+			else if (tick & RUN) begin
 				if (sleeping) begin
 					if (cnt >= REGEN_TICKS - 1) begin
 						cnt <= 8'd0;
@@ -110,3 +107,5 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 	end
 
 endmodule 
+
+	
