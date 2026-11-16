@@ -54,6 +54,7 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 	input tick,
 	input RUN,
 	input SW,
+	input play_pulse,
 	output reg [3:0] energy,
 	output sleeping,
 	output energy_low,
@@ -103,6 +104,16 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 							cnt <= cnt + 1'b1;
 				end 
 			end
+
+			if (RUN && !sleeping && play_pulse) begin
+            	if (tick && !sleeping_d && cnt >= DECAY_TICKS - 1) begin
+                	if (energy_down > 4'd0)
+                    	energy <= energy_down - 4'd1;
+            	end else if (energy > 4'd0) begin
+                	energy <= energy - 4'd1;
+            end
+        end
+
 		end
 	end
 

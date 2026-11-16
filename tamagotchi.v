@@ -25,8 +25,8 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
     assign tick = (tick_count == 26'd49_999_999);
 
     // KEY1 feeds, KEY2 plays, KEY3 gives medicine (flipflops of KEYS 0-3)
-    assign feed_pulse = buttons_previous[0] && !buttons_sync2[0];
-    assign play_pulse = buttons_previous[1] && !buttons_sync2[1] && !feed_pulse;
+    assign feed_pulse = !sleeping && buttons_previous[0] && !buttons_sync2[0];
+    assign play_pulse = !sleeping && buttons_previous[1] && !buttons_sync2[1] && !feed_pulse;
     assign medicine_pulse = buttons_previous[2] && !buttons_sync2[2];
 
     // clock
@@ -67,6 +67,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
         .tick(tick),
         .RUN(SW[9]),
         .SW(sleep_sync2),
+        .play_pulse(play_pulse),
         .energy(energy),
         .sleeping(sleeping)
     );
