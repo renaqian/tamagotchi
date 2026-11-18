@@ -105,6 +105,47 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
     hex_digit energy_digit (.digit(energy), .segments(HEX4));
     hex_digit fullness_digit (.digit(fullness), .segments(HEX2));
     hex_digit happiness_digit (.digit(happiness), .segments(HEX0));
+
+    // vga demo: display happy picture when happiness >= 5, sad picture otherwise
+
+    wire happy = (happiness >= 4'd5);
+    wire [8:0] vga_color;
+    wire [8:0] vga_x;
+    wire [7:0] vga_y;
+    wire vga_write;
+
+    // scans two stored pics into VGA adapter (one pixel per rising edge)
+
+    pet_display face(
+        .clk(CLOCK_50),
+        .resetn(resetn),
+        .happy(happy),
+        .color(vga_color),
+        .x(vga_x),
+        .y(vga_y),
+        .write(vga_write)
+    );
+
+    vga_adapter VGA (
+        .resetn(resetn),
+        .clock(CLOCK_50),
+        .color(vga_color),
+        .x(vga_x),
+        .y(vga_y),
+        .write(vga_write),
+        .VGA_R(VGA_R),
+        .VGA_G(VGA_G),
+        .VGA_B(VGA_B),
+        .VGA_HS(VGA_HS),
+        .VGA_VS(VGA_VS),
+        .VGA_BLANK_N(VGA_BLANK_N),
+        .VGA_SYNC_N(VGA_SYNC_N),
+        .VGA_CLK(VGA_CLK));
+    
+    defparam VGA.RESOLUTION = "320x240";
+    defparam VGA.COLOR_DEPTH = 9;
+    defparam VGA.BACKGROUND_IMAGE = "./MIF/happy_320_9.mif";
+    
 endmodule
 
 module hex_digit (input wire [3:0] digit, output reg [6:0] segments);
