@@ -1,5 +1,7 @@
 module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] SW,
-    output wire [9:0] LEDR, output wire [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0);
+    output wire [9:0] LEDR, output wire [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0,
+    output wire [7:0] VGA_R, VGA_G, VGA_B, output wire VGA_HS, VGA_VS, 
+    output wire VGA_BLANK_N, VGA_SYNC_N, VGA_CLK);
 
     // declare the wires for module
     wire resetn;

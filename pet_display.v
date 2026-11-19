@@ -24,9 +24,17 @@ module pet_display #(
     input happy,
     output reg [8:0] color,
     output reg [8:0] x,
-    ouput reg [7:0] y,
+    output reg [7:0] y,
     output write
 );
+
+    
+
+    // Quartus loads these ROMs from MIF files during compilation.
+    (* ram_init_file = "MIF/happy_320_9.mif" *)
+    reg [8:0] rom_happy [0:76799];
+    (* ram_init_file = "MIF/mad_320_9.mif" *)
+    reg [8:0] rom_sad [0:76799];
 
     reg [8:0] sx;
     reg [7:0] sy;
@@ -49,7 +57,7 @@ module pet_display #(
             sx <= sx + 1'b1;
     end
 
-    wire [16:0] addr = {sy, 8'b0} + {sy, 6'b0} + xs;
+    wire [16:0] addr = {sy, 8'b0} + {sy, 6'b0} + sx;
 
     reg [8:0] q_happy, q_sad;
     reg [8:0] x1;
@@ -65,11 +73,11 @@ module pet_display #(
     end
 
     always @(posedge clk) begin
-        color <= sel1 ? q_happy : q_mad;
+        color <= sel1 ? q_happy : q_sad;
         x <= x1;
         y <= y1;
     end
 
     // write every cycle: the scan rewrites every pixel
-    assign write = 1'b1;
+    assign write = resetn;
 endmodule
