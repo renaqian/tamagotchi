@@ -6,10 +6,10 @@
 		use linear feedback shift register to simulate random "sickness" event
 	
 	while sick: 
-		health cannot exceed SICK_CAP
+		health cannot exceed HEALTH_MAX
 		health drops 1 every SICK_DECAY_TICKS ticks until medicine is given
 		one-cycle pulse use of medicine (KEY0) cures sickness (ignored when not sick)
-		if health stays at 0 for DEATH_AFTER ticks, pet dies
+		if health is 0 at a c, pet dies
 	
 */
 

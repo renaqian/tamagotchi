@@ -1,11 +1,11 @@
 `default_nettype none
 
-/*  Shows the Tamagotchi picture on the VGA display.
- *
- *  This is the display_mif demo with one change: the vga_adapter's video memory is
- *  loaded from ./MIF/tamagotchi_640_9.mif instead of the default rainbow image.
- *  The picture is stored in the FPGA when you program the board, so nothing has to be drawn.
- *  Press KEY[0] to reset the VGA controller if the screen is blank after programming.
+/* shows happy tamagotchi pic on vga display
+
+    changed display_mif demo with one change: vga_adapter's video memory is loaded from 
+    ./MIF/tamagotchi_640_9.mif instead of from default rainbow pic
+    KEY[0] to reset the vga controller if screen is blank
+
 */
 module vga_demo(CLOCK_50, KEY, LEDR, VGA_R, VGA_G, VGA_B,
                 VGA_HS, VGA_VS, VGA_BLANK_N, VGA_SYNC_N, VGA_CLK);
@@ -27,7 +27,7 @@ module vga_demo(CLOCK_50, KEY, LEDR, VGA_R, VGA_G, VGA_B,
     output VGA_SYNC_N;
     output VGA_CLK;
 
-    // Nothing is drawn on top of the background, so the write port is tied off.
+    // nothing is drawn on top of the background, so the write port is tied off.
     wire [8:0] color;
     wire [nX-1:0] X;
     wire [nY-1:0] Y;

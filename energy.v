@@ -27,7 +27,7 @@
 	
 */ 
 
-`define DECAY_TICKS 3
+`define DECAY_TICKS 3 // temp values for demo
 `define REGEN_TICKS 2
 `define ENERGY_DECAY 1
 `define ENERGY_REGEN 1
@@ -60,7 +60,7 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 	output energy_low,
 	output energy_zero
 );
-		
+	
 	localparam [3:0] MAX4 = MAX_VAL;
 	localparam [3:0] DEC4 = DECAY_AMT;
 	localparam [3:0] REG4 = REGEN_AMT;
@@ -70,7 +70,7 @@ module energy #(parameter DECAY_TICKS = `DECAY_TICKS,
 	reg sleeping_d;
 	
 	assign sleeping = SW & RUN;
-	assign energy_low = (energy < 4'd4);
+	assign energy_low = (energy < LOW4);
 	assign energy_zero = (energy == 4'd0);
 	
 	wire [4:0] up_sum = {1'b0, energy} + {1'b0, REG4};
