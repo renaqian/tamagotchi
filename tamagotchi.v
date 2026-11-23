@@ -10,6 +10,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
     wire feed_pulse, play_pulse, medicine_pulse;
     wire sick;
     wire [3:0] fullness, happiness, energy;
+    wire [1:0] mood;
 
     reg [25:0] tick_count;
     reg [2:0] buttons_sync1, buttons_sync2;
@@ -99,6 +100,18 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
         .sick_start()
     );
 
+    // pet mood FSM
+    mood_controller pet_mood (
+        .clk(CLOCK_50),
+        .resetn(resetn),
+        .tick(tick),
+        .run(SW[9]),
+        .energy(energy),
+        .fullness(fullness),
+        .happiness(happiness),
+        .mood(mood)
+    );
+
     // Assigning constant hexes
     assign HEX5 = 7'b0000110; // E
     assign HEX3 = 7'b0001110; // F
@@ -110,7 +123,6 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
 
     // vga demo: display happy picture when happiness >= 5, sad picture otherwise
 
-    wire happy = (happiness >= 4'd5);
     wire [8:0] vga_color;
     wire [8:0] vga_x;
     wire [7:0] vga_y;
@@ -118,10 +130,12 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
 
     // scans two stored pics into VGA adapter (one pixel per rising edge)
 
-    pet_display face(
+    pet_display face (
         .clk(CLOCK_50),
         .resetn(resetn),
-        .happy(happy),
+        .mood(mood),
+        .sick(sick),
+        .sleeping(sleeping),
         .color(vga_color),
         .x(vga_x),
         .y(vga_y),
