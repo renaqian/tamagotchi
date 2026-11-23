@@ -66,7 +66,7 @@ input wire [3:0] energy, input wire [3:0] fullness, input wire [3:0] happiness, 
             if (next_state != state)
                 recovery_count <= 2'd0;
             else if (!recovery_allowed)
-                recovety_count <= 2'd0;
+                recovery_count <= 2'd0;
             // otherwise start counting towards changing state
             else if (tick)
                 recovery_count <= recovery_count + 2'd1;
