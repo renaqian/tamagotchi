@@ -86,7 +86,7 @@ module pet_display #(
     always @* begin
         case (stage)
             EGG: picture = 5'd0;
-            BABY: picture = 5'd2;
+            BABY: picture = 5'd2 + apperance;
             KID: picture = 5'd8 + appearance;
             ADULT: picture = 5'd14 + appearance;
             ELDER: picture = 5'd20 + appearance;
