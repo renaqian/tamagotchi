@@ -11,6 +11,9 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
     wire sick;
     wire [3:0] fullness, happiness, energy;
     wire [1:0] mood;
+    wire dead;
+    wire [2:0] stage;
+    wire alive_run;
 
     reg [25:0] tick_count;
     reg [2:0] buttons_sync1, buttons_sync2;
@@ -49,9 +52,9 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
             else
                 tick_count <= tick_count + 26'd1;
 
-            if (!sick || (SW[9] && medicine_pulse))
+            if (!sick || (alive_run && medicine_pulse))
             sickness_leds <= 10'b1111111111;
-            else if(SW[9] && tick)
+            else if(alive_run && tick)
                 sickness_leds <= {1'b0, sickness_leds[9:1]};
 
             buttons_sync1 <= KEY[3:1];
@@ -64,11 +67,21 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
     end
 
     // instantiate the modules
+    life_stage stages (
+        .clk(CLOCK_50),
+        .resetn(resetn),
+        .tick(tick),
+        .go(SW[9]),
+        .dead_in(dead),
+        .stage(stage),
+        .alive_run(alive_run)
+    );
+
     energy pet_energy (
         .clk(CLOCK_50),
         .resetn(resetn),
         .tick(tick),
-        .RUN(SW[9]),
+        .RUN(alive_run),
         .SW(sleep_sync2),
         .play_pulse(play_pulse),
         .energy(energy),
@@ -79,7 +92,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
         .clk(CLOCK_50),
         .resetn(resetn),
         .tick(tick),
-        .run(SW[9]),
+        .run(alive_run),
         .sleeping(sleeping),
         .feed_pulse(feed_pulse),
         .play_pulse(play_pulse),
@@ -91,7 +104,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
         .clk(CLOCK_50),
         .resetn(resetn),
         .tick(tick),
-        .run(SW[9]),
+        .run(alive_run),
         .medicine(medicine_pulse),
         .sick(sick),
         .health(),
@@ -105,7 +118,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
         .clk(CLOCK_50),
         .resetn(resetn),
         .tick(tick),
-        .run(SW[9]),
+        .run(alive_run),
         .energy(energy),
         .fullness(fullness),
         .happiness(happiness),
@@ -133,6 +146,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
     pet_display face (
         .clk(CLOCK_50),
         .resetn(resetn),
+        .stage(stage),
         .mood(mood),
         .sick(sick),
         .sleeping(sleeping),

@@ -8,6 +8,16 @@
     for each position the ROM outputs that pixel's colour
     the whole screen is rewritten every 320 * 240 = 76800 clock cycles (1.5ms at 50MHz)
 
+    picture displayed depends on life stage and appearance (mood, sick, sleeping)
+
+    pictures are oredered in the ROM:
+        - 0: egg 
+        - 1: dead 
+        - 2-7: baby: happy, sad, mad, sleeping, sick, sick+sleeping 
+        - 8-13: kid (same 6)
+        - 14-19: adult (same 6)
+        - 20-25: elder (same 6)
+
 */
 
 module pet_display #(
@@ -15,10 +25,11 @@ module pet_display #(
     parameter H = 240
 )
 
-// added mood, sick, sleeping input
+// added life stage, mood, sick, sleeping input
 (
     input clk,
     input resetn,
+    input [2:0] stage,
     input [1:0] mood,
     input sick,
     input sleeping,
@@ -28,7 +39,14 @@ module pet_display #(
     output write
 );
 
-    
+    // life stages (same numbers as life_stage.v)
+    localparam EGG   = 3'd0;
+    localparam BABY  = 3'd1;
+    localparam KID   = 3'd2;
+    localparam ADULT = 3'd3;
+    localparam ELDER = 3'd4;
+    localparam DEAD  = 3'd5;
+
     // parameters for mood FSM / events
     localparam HAPPY    = 3'd0;
     localparam SAD      = 3'd1;
@@ -63,40 +81,44 @@ module pet_display #(
 
     // rena add the images pls each image should be 80x60 and u can change the filenames or wtv
 
+    reg [4:0] picture;
+
+    always @* begin
+        case (stage)
+            EGG: picture = 5'd0;
+            BABY: picture = 5'd2;
+            KID: picture = 5'd8 + appearance;
+            ADULT: picture = 5'd14 + appearance;
+            ELDER: picture = 5'd20 + appearance;
+            default: picture = 5'd1;
+        endcase 
+    end
+
+    // 80x60 pixels per picture, 26 pictures
     // Quartus loads these ROMs from MIF files during compilation.
-   // (* ram_init_file = "MIF/happy_80_9.mif" *)
-    reg [8:0] rom_happy [0:4799];
 
-    // (* ram_init_file = "MIF/sad_80_9.mif" *)
-    reg [8:0] rom_sad [0:4799];
+    localparam NUM_PICS = 26;
+    localparam [12:0] IMG_SIZE = 13'd4800; // 80*60
 
-    // (* ram_init_file = "MIF/mad_80_9.mif" *)
-    reg [8:0] rom_mad [0:4799];
+    (* ram_init_file = "MIF/pet_80_9.mif" *)
 
-    // (* ram_init_file = "MIF/sleeping_80_9.mif" *)
-    reg [8:0] rom_sleeping [0:4799];
-
-    // (* ram_init_file = "MIF/sick_80_9.mif" *)
-    reg [8:0] rom_sick [0:4799];
-
-    // (* ram_init_file = "MIF/sick_sleeping_80_9.mif" *)
-    reg [8:0] rom_sick_sleeping [0:4799];
+    reg [8:0] rom [0:NUM_PICS*4800-1];
 
     reg [8:0] sx;
     reg [7:0] sy;
-    reg [2:0] selected;
+    reg [4:0] selected; // pic num for this frame
 
     always @(posedge clk) begin
         if (!resetn) begin
             sx <= 9'd0;
             sy <= 8'd0;
-            selected <= HAPPY;
+            selected <= 5'd0;
 
         end else if (sx == W - 1) begin
             sx <= 9'd0;
             if (sy == H - 1) begin
                 sy <= 8'd0;
-                selected <= appearance;
+                selected <= picture;
             end else
                 sy <= sy + 1'b1;
         end else 
@@ -118,6 +140,8 @@ module pet_display #(
                   {3'b0, image_y, 4'b0} +
                   {6'b0, image_x};
 
+    wire [16:0] rom_addr = selected * IMG_SIZE + addr;
+
     reg [8:0] pixel;
     reg [8:0] x1;
     reg [7:0] y1;
@@ -125,15 +149,7 @@ module pet_display #(
     reg valid2;
 
     always @(posedge clk) begin
-        case (selected)
-            HAPPY:         pixel <= rom_happy[addr];
-            SAD:           pixel <= rom_sad[addr];
-            MAD:           pixel <= rom_mad[addr];
-            SLEEPING:      pixel <= rom_sleeping[addr];
-            SICK:          pixel <= rom_sick[addr];
-            SICK_SLEEPING: pixel <= rom_sick_sleeping[addr];
-            default:  pixel <= rom_happy[addr];
-        endcase
+        pixel <= rom[rom_addr];
 
         x1 <= sx;
         y1 <= sy;
