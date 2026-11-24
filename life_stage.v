@@ -43,7 +43,7 @@ module life_stage #(
     wire alive = (STAGE >= BABY) && (stage <= ELDER);
     assign alive_run = go & alive;
 
-    always @(posedge clk or nedge resetn) begin
+    always @(posedge clk or negedge resetn) begin
         if (!resetn) begin
             stage <= EGG;
             timer <= 16'd0;
