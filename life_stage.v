@@ -18,10 +18,10 @@ during egg stage and after death, all stats freeze
 
 */
 
-'define GAME_SECONDS 600
+`define GAME_SECONDS 600
 
 module life_stage #(
-    parameter GAME_SECONDS = 'GAME_SECONDS 
+    parameter GAME_SECONDS = `GAME_SECONDS
 
 )
 (
@@ -40,7 +40,7 @@ module life_stage #(
 
     reg [15:0] timer;
 
-    wire alive = (STAGE >= BABY) && (stage <= ELDER);
+    wire alive = (stage >= BABY) && (stage <= ELDER);
     assign alive_run = go & alive;
 
     always @(posedge clk or negedge resetn) begin
