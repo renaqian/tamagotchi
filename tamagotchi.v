@@ -108,7 +108,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
         .medicine(medicine_pulse),
         .sick(sick),
         .health(),
-        .dead(),
+        .dead(dead),
         .health_low(),
         .sick_start()
     );
@@ -174,7 +174,7 @@ module tamagotchi (input wire CLOCK_50, input wire [3:0] KEY, input wire [9:0] S
     
     defparam VGA.RESOLUTION = "320x240";
     defparam VGA.COLOR_DEPTH = 9;
-    defparam VGA.BACKGROUND_IMAGE = "./MIF/happy_320_9.mif";
+    defparam VGA.BACKGROUND_IMAGE = "./MIF/pet_80_9.mif";
     
 endmodule
 

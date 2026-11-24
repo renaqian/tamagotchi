@@ -73,7 +73,7 @@ module stage_needs #(
 
     assign fullness_ticks = baby ? FULLNESS_BABY : kid ? FULLNESS_KID : elder ? FULLNESS_ELDER : FULLNESS_ADULT;
     assign happiness_ticks = baby ? HAPPINESS_BABY : kid ? HAPPINESS_KID : elder ? HAPPINESS_ELDER : HAPPINESS_ADULT;
-    assign fullness_ticks = baby ? ENERGY_BABY : kid ? ENERGY_KID : elder ? ENERGY_ELDER : ENERGY_ADULT;
+    assign energy_ticks = baby ? ENERGY_BABY : kid ? ENERGY_KID : elder ? ENERGY_ELDER : ENERGY_ADULT;
     assign sick_chance = baby ? SICK_BABY : kid ? SICK_KID : elder ? SICK_ELDER : SICK_ADULT;
 
 endmodule
